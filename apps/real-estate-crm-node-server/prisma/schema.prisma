@@ -1,0 +1,65 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Property {
+  address           String?
+  agentAssignment   AgentAssignment?    @relation(name: "AgentAssignmentOnProperties", fields: [agentAssignmentId], references: [id])
+  agentAssignmentId String?
+  agentAssignments  AgentAssignment[]   @relation(name: "AgentAssignmentsOnProperty")
+  createdAt         DateTime            @default(now())
+  description       String?
+  id                String              @id @default(cuid())
+  price             Float?
+  status            EnumPropertyStatus?
+  updatedAt         DateTime            @updatedAt
+}
+
+model AgentAssignment {
+  agentName  String?
+  client     Client?    @relation(name: "AgentAssignmentsOnClient", fields: [clientId], references: [id])
+  clientId   String?
+  clients    Client[]   @relation(name: "AgentAssignmentOnClients")
+  createdAt  DateTime   @default(now())
+  endDate    DateTime?
+  id         String     @id @default(cuid())
+  properties Property[] @relation(name: "AgentAssignmentOnProperties")
+  property   Property?  @relation(name: "AgentAssignmentsOnProperty", fields: [propertyId], references: [id])
+  propertyId String?
+  startDate  DateTime?
+  updatedAt  DateTime   @updatedAt
+}
+
+model Client {
+  agentAssignment   AgentAssignment?  @relation(name: "AgentAssignmentOnClients", fields: [agentAssignmentId], references: [id])
+  agentAssignmentId String?
+  agentAssignments  AgentAssignment[] @relation(name: "AgentAssignmentsOnClient")
+  appointments      Appointment[]
+  createdAt         DateTime          @default(now())
+  email             String?
+  firstName         String?
+  id                String            @id @default(cuid())
+  lastName          String?
+  phoneNumber       String?
+  updatedAt         DateTime          @updatedAt
+}
+
+model Appointment {
+  agent     String?
+  client    Client?   @relation(fields: [clientId], references: [id])
+  clientId  String?
+  createdAt DateTime  @default(now())
+  date      DateTime?
+  id        String    @id @default(cuid())
+  location  String?
+  updatedAt DateTime  @updatedAt
+}
+
+enum EnumPropertyStatus {
+  Option1
+}
